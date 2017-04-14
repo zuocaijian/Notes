@@ -31,7 +31,7 @@
 		sudo apt-get install libx264-dev  
 		或者  
 		cd ~/ffmpeg_sources  
-		wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2  
+		wget http://download.videolan.org/pub/x264/snapshots/last_x264.tar.bz2    
 		tar xjvf last_x264.tar.bz2  
 		cd x264-snapshot*  
 		PATH="$HOME/bin:$PATH" ./configure --prefix="$HOME/ffmpeg_build" --bindir="$HOME/bin" --enable-static --disable-opencl  
@@ -112,5 +112,156 @@
 * 源码解析可参考[《 FFmpeg源代码简单分析：makefile》](http://blog.csdn.net/leixiaohua1020/article/details/44556525#comments)系列博客  
 
 # 编译Android下可用的so动态链接库
+* **编译环境**
+	* ubuntu 16.04 lts + android-ndk-r14b-linux-x86_64
+	* AndroidStudio2.3.1 + Gradle 3.3 + Gradle Plugin 2.3.1 + android-ndk-r14b-windows-x86_64  
+	<p/>
 * [官方文档](https://trac.ffmpeg.org/wiki/CompilationGuide/Android)
-* 中文简单编译步骤可参考博客[《FFmpeg的Android平台移植—编译篇》](http://blog.csdn.net/gobitan/article/details/22750719)。其中build_android.sh脚本文件可在压缩包内找到，只需替换NDK路径即可
+* 编译步骤可参考博客[《FFmpeg的Android平台移植—编译篇》](http://blog.csdn.net/gobitan/article/details/22750719)。其中build_android.sh脚本文件可在压缩包内找到，只需替换NDK路径即可。
+* 使用so创建app并通过jni调用可参考博客[《最纯粹的Android直播技术实战01-FFmpeg的编译与运行》](http://blog.csdn.net/u011485531/article/details/55804380)
+* **步骤列表：**
+	1. 在ubuntu下交叉编译出Android可用的so文件（avutil-55"、"avcodec-57"、"swresample-2"、"avformat-57"、"swscale-4"、"avfilter-6"、"ffmpeg_codec")共7个动态链接库，以及include头文件目录；
+	2. 在AndroidStudio中新建项目，**取消勾选 'include C++ support'**，否则项目会采用CmakeList文件构建；
+	3. 在项目根目录下新建jni目录, 在jni目录下新建prebuilt目录, 将7个动态链接库copy到该目录下，同时，将include头文件目录下的所有文件copy到jni目录下；
+	4. 在jni目录下创建Android.mk文件和Application.mk文件；
+	5. 配置AndroidStudio。**点击项目根目录右键，选择 'Linke C++ Project with Gradle', Build System 选择 'ndk-bundle'，Project Path 选择jni目下的Android.mk文件**；
+	6. 经过步骤5后，在项目build.gradle文件里的android节点下会自动生成节点externalNativeBuild，其配置如下:
+		<pre>
+		externalNativeBuild {
+        	ndkBuild {  
+				path 'jni/Android.mk'
+        	}
+    	}
+		</pre>  
+	我们还需要在android.defaultConfig节点下配置externalNativeBuild节点，配置如下：  
+		<pre>
+		externalNativeBuild {  
+			ndkBuild {  
+				arguments "NDK_APPLICATION_MK=jni/Application.mk"  
+				cppFlags "-frtti", "-fexceptions"  
+				abiFilters "armeabi"  
+			}  
+		}  
+		</pre>  
+		> 虽然在jni目录下配置了Application.mk，并指定了abiFilters，但实践中发现其并没有起作用，所以一定要记得在build.gradle的android.defaultConfig节点下配置，否则在生成目标动态链接库时会报链接错误。
+	7. 编写Android.mk  
+			<pre>
+		LOCAL_PATH := $(call my-dir)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE := avcodec-57-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libavcodec-57.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE := avdevice-57-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libavdevice-57.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE := avfilter-6-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libavfilter-6.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE := avformat-57-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libavformat-57.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE :=  avutil-55-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libavutil-55.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE :=  avswresample-2-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libswresample-2.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+		TARGET_ARCH_ABI := armeabi
+		LOCAL_MODULE :=  swscale-4-prebuilt
+		LOCAL_SRC_FILES := prebuilt/libswscale-4.so
+		include $(PREBUILT_SHARED_LIBRARY)
+
+		include $(CLEAR_VARS)
+
+		TARGET_ARCH_ABI := armeabi
+
+		LOCAL_MODULE := ffmpeg_codec
+		LOCAL_SRC_FILES := com_zcj_myffmpeg_FFmpegNative.c
+
+		LOCAL_LDLIBS := -llog -ljnigraphics -lz -landroid
+		LOCAL_SHARED_LIBRARIES := avdevice-57-prebuilt avfilter-6-prebuilt avformat-57-prebuilt avcodec-57-prebuilt avswresample-2-prebuilt swscale-4-prebuilt avutil-55-prebuilt
+
+		include $(BUILD_SHARED_LIBRARY)
+		</pre>  
+		> 1.LOCAL_PATH := $(call my-dir) 表明是在当前目录下（即Android.mk所在目录）；  
+		> 2.TARGETARCHABI := armeabi 表明要生成的目标cpu架构；  
+		> 3.LOCALMODULE := avfilter-6-prebuilt 表明要生成的动态链接库模块的名字；  
+		> 4.LOCALSRCFILES := prebuilt/libavutil-55.so 表明生成动态链接库模块的源文件；  
+		> 5.include $(PREBUILT_SHARED_LIBRARY) 表明是该模块是已经编译好的预编译动态库。通常这句话会指示NDK将预编译库在libs目录下复制一份；  
+		> 6.PREBUILT_SHARED_LIBRARY := ... 表明了生成动态链接库模块需要链接的文件；  
+		> 7.include $(BUILD_SHARED_LIBRARY) 表明了这是真正需要编译生成的动态链接库模块。
+	8. 实现jni调用(只列出核心代码)  
+		* java层代码
+			<pre>
+			static {
+        		System.loadLibrary("avutil-55");
+        		System.loadLibrary("avcodec-57");
+        		System.loadLibrary("swresample-2");
+        		System.loadLibrary("avformat-57");
+        		System.loadLibrary("swscale-4");
+        		System.loadLibrary("avfilter-6");
+        		System.loadLibrary("ffmpeg_codec");
+    		}
+
+    		public native int avcodec_find_decoder(int codecID);
+			</pre>
+		* Native层代码
+			<pre>
+				#include <math.h>
+				#include <libavutil/opt.h>
+				#include <libavcodec/avcodec.h>
+				#include <libavutil/channel_layout.h>
+				#include <libavutil/common.h>
+				#include <libavutil/imgutils.h>
+				#include <libavutil/mathematics.h>
+				#include <libavutil/samplefmt.h>
+				#include "com_zcj_myffmpeg_FFmpegNative.h"
+				#ifdef __cplusplus
+				extern "C" {
+				#endif
+				/*
+ 				* Class:     com_zcj_myffmpeg_FFmpegNative
+ 				* Method:    avcodec_find_decoder
+ 				* Signature: (I)I
+ 				*/
+				JNIEXPORT jint JNICALL Java_com_zcj_myffmpeg_FFmpegNative_avcodec_1find_1decoder
+  					(JNIEnv *env, jobject obj, jint codecID)
+				{
+					AVCodec \*codec = NULL;
+					/\* register all formats and codecs */
+					av_register_all();
+					codec = avcodec_find_decoder(codecID);
+					if (codec != NULL)
+					{
+						return 0;
+					}
+					else
+					{
+						return -1;
+					}
+				}
+				#ifdef __cplusplus
+				}
+				#endif
+			</pre>  
+		> com_zcj_myffmpeg_FFmpegNative.h 头文件调用javah -jni命令生成即可。
+	9. 
