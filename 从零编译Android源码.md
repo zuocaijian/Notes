@@ -14,7 +14,7 @@
 	  * 右键新建的虚拟机，选择CD/DVD，选择“使用ISO映像文件”，选择系统镜像文件，然后确定
 	  * 按正常流程在虚拟机里安装Ubuntu系统。建议选择英语，如果选择简体中文，需要花费漫长的时间来下载语言包；
 	  * 安装系统镜像完成后需要安装VMWare tools增强工具。关闭虚拟机，步骤1重新到“选择ISO映像文件”，选择VMWare安装目录下的linux.iso，然后确定，重新开机。使用**sudo passwd**设置root账户初始密码，然后安装/media/用户名/VMWare tools目录下的vmware-install.pl。因为涉及到权限等问题，建议将VMWare tools整个目录拷贝到用户目录下，解压之后安装，最后重启虚拟机；
-  5. 在Ubuntu镜像中选择靠谱的软件源（如china下的阿里云、163等），安装vim等常用软件；
+  5. 在Ubuntu镜像源列表中选择靠谱的软件源（如china下的阿里云、163等），安装vim等常用软件；
   6. 安装JDK。因为不同的Android版本会需要不同的jdk版本，因此需要安装多个不同版本的jdk。比如：
 	  * 使用'sudo apt-get install openjdk-8-jdk'命令，安装openjdk8；
 	  * 使用'sudo add-apt-repository ppa:webupd8team/java'命令添加ppa源，然后'sudo apt-get update'更新源列表，最后'sudo apt-get install oracle-java7-installer'安装oracle jdk8；
@@ -39,16 +39,16 @@
   8. 安装编译Android源码以及Liunx内核需要用到的一个基于文本的图形终端动态库ncurses。使用'sudo apt-get install libncurses5-dev'命令即可完成安装；
   9. 根据官网建议，安装编译Android源码需要用到的一些依赖库:  
   
-		sudo apt-get install libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-dev g++-multilib  
-		sudo apt-get install -y git flex bison gperf build-essential libncurses5-dev:i386  
-		sudo apt-get install tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386   
-		sudo apt-get install dpkg-dev libsdl1.2-dev libesd0-dev  
-		sudo apt-get install git-core gnupg flex bison gperf build-essential    
-		sudo apt-get install zip curl zlib1g-dev gcc-multilib g++-multilib  
-		sudo apt-get install libc6-dev-i386  
-		sudo apt-get install lib32ncurses5-dev x11proto-core-dev libx11-dev   
-		sudo apt-get install libgl1-mesa-dev libxml2-utils xsltproc unzip m4  
-		sudo apt-get install lib32z-dev ccache  
+			sudo apt-get install libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-dev g++-multilib  
+			sudo apt-get install -y git flex bison gperf build-essential libncurses5-dev:i386  
+			sudo apt-get install tofrodos python-markdown libxml2-utils xsltproc zlib1g-dev:i386   
+			sudo apt-get install dpkg-dev libsdl1.2-dev libesd0-dev  
+			sudo apt-get install git-core gnupg flex bison gperf build-essential    
+			sudo apt-get install zip curl zlib1g-dev gcc-multilib g++-multilib  
+			sudo apt-get install libc6-dev-i386  
+			sudo apt-get install lib32ncurses5-dev x11proto-core-dev libx11-dev   
+			sudo apt-get install libgl1-mesa-dev libxml2-utils xsltproc unzip m4  
+			sudo apt-get install lib32z-dev ccache  
 
   10. 初始化Android源码编译的环境：source build/envsetup.sh。建议初始化后重启虚拟机  
 
@@ -58,23 +58,23 @@
 
 # 下载源码
   1. 下载Android源码。由于Android源码十分大，且开源服务器在国外，下载起来非常缓慢，难以忍受。因此可以寻找其他方式，如镜像源下载。关于下载方式可上网查看教程。这里建议直接从[百度网盘](http://pan.baidu.com/s/1ngsZs)下载别人打包好的源码压缩文件；
-  2. 在Ubuntu中解压缩压缩包（实测，在windows下加压该压缩文件，会出现文件重复等错误，导致最终的解压缩文件有问题）。由于Ubuntu原生并没有7zip压缩工具，因此需要使用 'sudo apt-get install p7zip-full' 下载，然后使用 '7z x 压缩包 -r -o目标目录' 命令将源码压缩包解压到指定文件夹(注意-o后面没有空格，直接跟目标目录)；
+  2. 在Ubuntu中解压缩压缩包（实测，在windows下解压该压缩文件，会出现文件重复等错误，导致最终的解压缩文件有问题）。由于Ubuntu原生并没有7zip压缩工具，因此需要使用 'sudo apt-get install p7zip-full' 下载，然后使用 '7z x 压缩包 -r -o目标目录' 命令将源码压缩包解压到指定文件夹(注意-o后面没有空格，直接跟目标目录)；
   3. 关于Android源码各个目录的用途可参考[Android 5.1.1 源码目录结构](http://blog.csdn.net/tfslovexizi/article/details/51888458);
-  4. 下载Android内核源码。由于Android开放源码工程中并不包括Kernel源码（系统镜像默认使用源码目录prebuild/Qume_kernel下已编译好的对应内核），因此Kernel内核需要另行下载。可使用国内镜像加载下载速度，镜像地址可参考[不翻墙下载Android内核源码](http://blog.csdn.net/sunao2002002/article/details/53057374)，使用命令 'git clone  https://aosp.tuna.tsinghua.edu.cn/kernel/common.git' 即可将项目源码克隆到本地。然后在common目录下 'git branch -a' 查看所有分支，最后 'git checkout XXX' 选择切换到需要的分支。源码大概1.5G。  
+  4. 下载Android内核源码。由于Android开放源码工程中并不包括Kernel源码（系统镜像默认使用源码目录prebuild/Qume_kernel下已编译好的对应内核），因此Kernel内核需要另行下载。可使用国内镜像加快下载速度，镜像地址可参考[不翻墙下载Android内核源码](http://blog.csdn.net/sunao2002002/article/details/53057374)，使用命令 'git clone  https://aosp.tuna.tsinghua.edu.cn/kernel/common.git' 即可将项目源码克隆到本地。然后在common目录下 'git branch -a' 查看所有分支，最后 'git checkout XXX' 选择切换到需要的分支。源码大概1.5G。  
 
 # 编译源码
-  1. 选择编译目标。切换到Android源码目录下，输入 'lunch'命令可打印出所有的编译目标，然后键入对应的数字选择相应的编译目标(一定要记得先初始化编译环境 'source envsetup.sh')；
+  1. 选择编译目标。切换到Android源码目录下，输入 'lunch' 命令可打印出所有的编译目标，然后键入对应的数字选择相应的编译目标(一定要记得先初始化编译环境 'source envsetup.sh')；
   2. 开始编译。键入 'make' 命令即可开始编译了，同时可以使用 -j 参数来指定线程数。线程数一般为cpu core数量*2，如 'make -j8' 即是指定8条线程来编译。如果一切顺利，可在该目录下的out文件夹看到.img系统镜像了。  
 
-> **Tips**
-> 测试1：i5 3230m，编译花了2h；
-> 测试2：i7 4790，编译花了；
+> **Tips**  
+> 测试1：i5 3230m，编译花了2h+；
+> 测试2：i7 4790，编译花了约110min；
 
 # 使用模拟器
   1. 编译完成之后，就可以通过以下命令运行Android虚拟机了：  
 
-		source build/envsetup.sh
-		lunch(选择刚才你设置的目标版本)
+		source build/envsetup.sh  
+		lunch(选择刚才你设置的目标版本)  
 		emulator
 
 >建议可阅读[官方编译指南](http://source.android.com/source/building.html)
