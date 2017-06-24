@@ -71,10 +71,32 @@
 > 测试2：i7 4790，编译花了约110min；
 
 # 使用模拟器
-  1. 编译完成之后，就可以通过以下命令运行Android虚拟机了：  
+  1. 编译完成之后，就可以通过以下命令运行Android模拟器了：  
 
 		source build/envsetup.sh  
 		lunch(选择刚才你设置的目标版本)  
 		emulator
 
->建议可阅读[官方编译指南](http://source.android.com/source/building.html)
+>建议可阅读[官方编译指南](http://source.android.com/source/building.html)  
+
+# 编译内核
+
+> 编译玩系统源码后打开模拟器所使用的内核是预编译好的（文件位置为），但是在实际练习的时候，我们经常会涉及到驱动文件的编写，内核文件的修改调试，这些都需要通过自定义内核来实现。因此，学习如何编译内核是非常有必要的。相对于编译系统源码来说，编译内核要简单的多。
+
+  1. 准备环境。如上，同编译系统源码一样。不过要记得 source build/envsetup.sh，不然许多命令会找不到；  
+  2. 下载内核源码。由于我们使用的是模拟器，因此需要下载对应的源码，这里推荐使用中科大的镜像源下载：?????????????????????，下载完成后源码共1.3G左右；
+  3. 使用 'git branch -a' 查看所有分支。因为我们编译的系统版本为Android 4.4，在模拟器中查看到其对应的内核版本为3.4.0，因此，这里我们也需要切换到goldfish 3.4分支，使用命令 'git checkout remotes/origin/android-goldfish-3.4' 即可；  
+  4. 导出交叉编译工具目录到PATH环境变量中去，执行命令：export PATH=$PATH:~XX/Android/prebuilts/gcc/linux-x86/arm/arm-eabi-4.7；  
+  5. 修改kernel/common根目录下的Makefile文件，将以下两行改为：  
+  
+	  	 ARCH ?= arm
+		 CROSS_COMPILE ?= arm-eabi-  
+
+	注意，该两行后面不能有空格。
+  6. 选择版本。使用 'lunch' 命令，然后输入数字选择对应的版本。我这里输入的为1，即 `1. aosp_arm-eng`；
+  7. 配置。使用 'make goldfish_armv7_defconfig' 命令。注意 **Android系统版本4.0以下，编译内核的时候使用的配置是 goldfish_defconfig，但是4.0以上的版本的系统需要ARMv7架构或者以上才能运行，因此需要使用配饰goldfish_armv7_defconfig**;
+  8. 细化配置。使用 'make menuconfig' 可修改详细的内核配置参数。该步可选，建议新手不修改；
+  9.  编译。使用 'make' 命令开始编译。同样可以使用 '-j' 参数来指定编译线程数量以加快编译。不过内核编译的速度一般很快，通常几分钟就能完成，编译完成后的文件为kernel/common/arch/arm/boot/zImage；
+  10.  切换到Android源码目录下，'emulator -kernel ./kernel/common/arch/arm/boot/zImage &' 即可开启模拟器并指定内核为我们刚才编译好的内核；
+  11.  使用 adb 相关命令或者直接查看 设置 里的手机信息，可发现，模拟器内核已经替换为我们编译好的内核。
+  	 
