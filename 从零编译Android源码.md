@@ -18,7 +18,7 @@
   6. 安装JDK。因为不同的Android版本会需要不同的jdk版本，因此需要安装多个不同版本的jdk。比如：
 	  * 使用'sudo apt-get install openjdk-8-jdk'命令，安装openjdk8；
 	  * 使用'sudo add-apt-repository ppa:webupd8team/java'命令添加ppa源，然后'sudo apt-get update'更新源列表，最后'sudo apt-get install oracle-java7-installer'安装oracle jdk8；
-	  * 从网上下载jdk1.6 64bit的安装文件jdk-6u45-linux-x64.bin，然后直接安装；
+	  * 从网上下载jdk1.6 64bit的安装文件jdk-6u45-linux-x64.bin，然后直接安装；  
 	  
 	  > 方式1、2安装后安装目录为/usr/lib/jvm/jdk-xx，方式3安装后安装目录为/usr/local/bin/jvm/jdk-xx。为方便起见，方式3需要将jvm目录剪切合并到/usr/lib/jvm中
 	  
