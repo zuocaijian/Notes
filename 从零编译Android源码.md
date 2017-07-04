@@ -98,5 +98,20 @@
   8. 细化配置。使用 'make menuconfig' 可修改详细的内核配置参数。该步可选，建议新手不修改；
   9.  编译。使用 'make' 命令开始编译。同样可以使用 '-j' 参数来指定编译线程数量以加快编译。不过内核编译的速度一般很快，通常几分钟就能完成，编译完成后的文件为kernel/common/arch/arm/boot/zImage；
   10.  切换到Android源码目录下，'emulator -kernel ./kernel/common/arch/arm/boot/zImage &' 即可开启模拟器并指定内核为我们刚才编译好的内核；
-  11.  使用 adb 相关命令或者直接查看 设置 里的手机信息，可发现，模拟器内核已经替换为我们编译好的内核。
+  11.  使用 adb 相关命令或者直接查看 设置 里的手机信息，可发现，模拟器内核已经替换为我们编译好的内核。  
+
+# 编译单独模块
+
+> 在学习内核、系统编译过程中，经常需要修改某些源码中单独的模块或新增模块，此时可使用 'mmm' 命令而不是 'make'。该命令页包含在envsetup.sh脚本中，其他命令还有 'm' 'mm' 'croot'等。
+
+1. 使用命令编译指定模块。如编译Email应用程序：
+  
+		mmm packages/apps/Email/
+  
+	编译完成后的目录为：Android系统自带App目录out/target/product/generic/system/app；C等可执行文件目录out/target/product/generic/system/bin；动态链接库文件目录out/target/product/generic/system/lib；HAL接口文件目录out/target/product/generic/system/lib/hw
+2. 重新打包system.img文件。在模块编译完成后键入：  
+
+		make snod
+
+3. 运行模拟器就可使用包含最新模块的编译系统了。
   	 
