@@ -18,7 +18,7 @@
   6. 安装JDK。因为不同的Android版本会需要不同的jdk版本，因此需要安装多个不同版本的jdk。比如：
 	  * 使用'sudo apt-get install openjdk-8-jdk'命令，安装openjdk8；
 	  * 使用'sudo add-apt-repository ppa:webupd8team/java'命令添加ppa源，然后'sudo apt-get update'更新源列表，最后'sudo apt-get install oracle-java7-installer'安装oracle jdk8；
-	  * 从网上下载jdk1.6 64bit的安装文件jdk-6u45-linux-x64.bin，然后直接安装；
+	  * 从网上下载jdk1.6 64bit的安装文件jdk-6u45-linux-x64.bin，然后直接安装；  
 	  
 	  > 方式1、2安装后安装目录为/usr/lib/jvm/jdk-xx，方式3安装后安装目录为/usr/local/bin/jvm/jdk-xx。为方便起见，方式3需要将jvm目录剪切合并到/usr/lib/jvm中
 	  
@@ -110,4 +110,19 @@
 
 > **SDK编译完成后，会将之前编译的system.img等文件删除。因此，在编译SDK前，强烈建议备份/out/target/product/generic文件夹。在SDK编译完成后，也建议将编译好的SDK文件备份。**
 > 参考：[自己动手编译最新Android源码及SDK](http://blog.csdn.net/dd864140130/article/details/51718187)
+
+# 编译单独模块
+
+> 在学习内核、系统编译过程中，经常需要修改某些源码中单独的模块或新增模块，此时可使用 'mmm' 命令而不是 'make'。该命令页包含在envsetup.sh脚本中，其他命令还有 'm' 'mm' 'croot'等。
+
+1. 使用命令编译指定模块。如编译Email应用程序：
+  
+		mmm packages/apps/Email/
+  
+	编译完成后的目录为：Android系统自带App目录out/target/product/generic/system/app；C等可执行文件目录out/target/product/generic/system/bin；动态链接库文件目录out/target/product/generic/system/lib；HAL接口文件目录out/target/product/generic/system/lib/hw
+2. 重新打包system.img文件。在模块编译完成后键入：  
+
+		make snod
+
+3. 运行模拟器就可使用包含最新模块的编译系统了。
   	 
