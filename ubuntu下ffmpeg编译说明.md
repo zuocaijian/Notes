@@ -143,7 +143,7 @@
 			}  
 		}  
 		</pre>  
-		> 虽然在jni目录下配置了Application.mk，并指定了abiFilters，但实践中发现其并没有起作用，所以一定要记得在build.gradle的android.defaultConfig节点下配置，否则在生成目标动态链接库时会报链接错误。
+		> **虽然在jni目录下配置了Application.mk，并指定了abiFilters，但实践中发现其并没有起作用，所以一定要记得在build.gradle的android.defaultConfig节点下配置，否则在生成目标动态链接库时会报链接错误。**
 	7. 编写Android.mk  
 			<pre>
 		LOCAL_PATH := $(call my-dir)
