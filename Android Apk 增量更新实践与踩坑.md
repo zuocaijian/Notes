@@ -1,6 +1,6 @@
 > 本文主要思路参考张鸿洋的博客[Android 增量更新完全解析 是增量不是热修复](http://blog.csdn.net/lmj623565791/article/details/52761658)
 
-1. 主要用到bsdiff，官方主页为[http://www.daemonology.net/bsdiff/](http://www.daemonology.net/bsdiff/)。我们需要下载[bsdiff](http://www.daemonology.net/bsdiff/bsdiff-4.3.tar.gz)，然后解压：tar -xzvf ..。解压后编译：make，发现报错，如下所示：
+1. 增量更新的差分包生成与合并主要用到bsdiff，官方主页为[http://www.daemonology.net/bsdiff/](http://www.daemonology.net/bsdiff/)。我们需要下载[bsdiff](http://www.daemonology.net/bsdiff/bsdiff-4.3.tar.gz)，然后解压：tar -xzvf ..。解压后编译：make，发现报错，如下所示：
 ```
 Makefile:13: *** missing separator.  Stop.
 ```
@@ -40,7 +40,7 @@ make: *** [bsdiff] 错误 1
         cc bspatch.c -lbz2 -o bspatch
 	```
 编译好之后就生成了可执行文件bsdiff和bspatch。
->**猜测：进过多次试验，应该是bzip2中的头文件包含关系有问题，或者说与我下载的bzip1.0.6版本与bsdiff不匹配。该错误在Android NDK编译中也会出现，下文会给出解决方案。**
+>**猜测：进过多次试验，应该是bzip2中的头文件包含关系有问题，或者说我下载的bzip1.0.6版本与bsdiff不匹配。该错误在Android NDK编译中也会出现，下文会给出解决方案。**
 
 4. 简单验证bsdiff和bspatch是否可用。
 	- 创建文本文件test1，在其中写入：
@@ -67,7 +67,7 @@ make: *** [bsdiff] 错误 1
 	- 直接用交叉编译链工具，生成Android可用的bspatch so文件；
 	- copy相关源码，通过Android IDE自带的构建工具在编译Apk的时候生成bspatch。
 两种方式都相对比较简单，一下主要介绍方式二。方式一只做个简单的介绍说明。**需要指出的是，因为bsdiff和bspatch都依赖到了bzip2，因此需要下载bzip2的源码，具体地址在本文前面可找到。**
-6. 首先简单说明下ubuntu下使用交叉编译工具链生成Android可用的bspatch的方法。首先需要下载好Android提供的linux下交叉编译工具链NDK，安装与配置可参考[Ubuntu搭建Android交叉编译环境](http://www.cnblogs.com/xieyajie/p/4727706.html)。Android源码中也包含了交叉编译工具链，文件目录为/Android/prebuilts/gcc/linux-x86/arm/arm-...。比较典型的Makefile写法如下：  
+6. 简单说明下ubuntu下使用交叉编译工具链生成Android可用的bspatch的方法。首先需要下载好Android提供的linux下交叉编译工具链NDK，安装与配置可参考[Ubuntu搭建Android交叉编译环境](http://www.cnblogs.com/xieyajie/p/4727706.html)。Android源码中也包含了交叉编译工具链，文件目录为/Android/prebuilts/gcc/linux-x86/arm/arm-...。linux下交叉编译比较典型的Makefile写法如下：  
 ```
 	# Show how to cross-compile c/c++ code for android platform
 	
@@ -110,8 +110,8 @@ make: *** [bsdiff] 错误 1
 		由于Android平台没有使用传统的c语言库libc，而是自己编写了一套更加高效更适合嵌入式平台的c语言库，所以系统头文件目录不能再使用默认的路径，必须直到Android平台的头文件目录。
 	- **-Wall -O2 -fPIC -DANDROID -DHAVE_PTHREAD -mfpu=neon -mfloat-abi=softfp**  
 		gcc常用的参数，可自行上网搜索。
-当然对于非常简单的.c文件(不涉及android特用的lib库)编译是不需要用到Makefile的，可以使用arm-linux-gcc交叉编译即可。
-7. 接下来的工作主要就是JNI开发了。
+当然对于非常简单的.c文件(不涉及android特用的lib库)编译是不需要用到Makefile的，可以export交叉编译工具链到系统环境，然后直接使用arm-linux-gcc交叉编译命令即可。
+7. 接下来的工作主要就是本地JNI开发了。
 	1. 提取已安装应用的apk文件，代码如下：  
 	```
     	public static String extract(Context context) {
@@ -154,7 +154,7 @@ make: *** [bsdiff] 错误 1
 		```
 		其中bspatch.c即为我们下载好的bsdiff压缩包内的文件，拷贝到与execBsPatch.c同目录下即可。patchMethod即为bspatch.c的main方法，需要我们手动将mian方法改名为patchMethod。
 		3. 拷贝我们下载的bzip2压缩包内的.c和.h文件到jni目录下。为方便起见，我们在jni目录下新建bzip2文件夹，专门放置bzip2相关的.c和.h文件。同时，我们需要将bspatch.c中对bzlib.h头文件包含更改为 #include "bzip2/bzlib.h"。
-		到这一步，本该JNI层代码已经完成，可是当进行编译的时候，会报各种各样的"undefined reference to xxxx..."，让人很是崩溃。经过我几个小时的试错，一个个文件的排查，最终发现是由于头文件包含关系而导致的错误。最终修改如下：
+		到这一步，JNI层代码本该算是已经完成，可是当进行编译的时候，会报各种各样的"undefined reference to xxxx..."，让人很是崩溃。经过我几个小时的试错，一个个文件的排查，最终发现是由于头文件包含关系问题而导致的错误。最终修改如下：
 			- 在bspatch.c文件中，需要同时包含bzlib.h和bzlib.c文件，即我们需要添加：
 			```
 			#include "bzip2/bzlib.c"
@@ -200,4 +200,4 @@ make: *** [bsdiff] 错误 1
     }
 	```
 	4. 编译项目，生成新旧两个apk，然后在PC端做差分包，下载到手机内置储存卡，就可以愉快的检验我们的增量更新是否成功了。
-8. 虽然网上有很多现成的项目可以copy，但是自己从头走一遍仍然收获颇多。如果只是简单的看一遍别人写过的代码，根本想不到这其中竟然有这么多的坑。最让我高兴的是，这其中有好多坑，完全是我自己解决的，相信很多人写的类似的文章根本没有碰到(直接拿别人的代码改改而已)或者碰到了也没有给出解决方案。虽然花费了近一天的时间，不过填了这么多坑，也算是值了。
+8. 虽然网上有很多现成的项目可以copy，但是自己从头走一遍仍然收获颇多。如果只是简单的看一遍别人写过的代码，根本想不到这其中竟然有这么多的坑。让我开心的是，这其中大部分的坑坑，完全是我自己独立解决的，相信很多人写的类似的文章根本没有碰到(也许直接拿别人的代码改改而已)或者碰到了也没有给出解决方案。因此，此次增量更新实践虽然花费了我近一天的时间，不过填了这么多坑，也算是值了。
