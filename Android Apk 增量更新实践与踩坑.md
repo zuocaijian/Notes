@@ -107,10 +107,10 @@ make: *** [bsdiff] 错误 1
 	- **CROSS_COMPILE**  
 		必须正确给出Android NDK编译工具链的路径，当在目录中执行make命令的时候，编译系统会根据 CROSS_COMPILE 前缀寻找对应的编译命令。
 	- **-I$(PLATFORM)/usr/include**  
-		由于Android平台没有使用传统的c语言库libc，而是自己编写了一套更加高效更适合嵌入式平台的c语言库，所以系统头文件目录不能再使用默认的路径，必须直到Android平台的头文件目录。
+		由于Android平台没有使用传统的c语言库libc，而是自己编写了一套更加高效更适合嵌入式平台的c语言库，所以系统头文件目录不能再使用默认的路径，必须指到Android平台的头文件目录。
 	- **-Wall -O2 -fPIC -DANDROID -DHAVE_PTHREAD -mfpu=neon -mfloat-abi=softfp**  
 		gcc常用的参数，可自行上网搜索。
-当然对于非常简单的.c文件(不涉及android特用的lib库)编译是不需要用到Makefile的，可以export交叉编译工具链到系统环境，然后直接使用arm-linux-gcc交叉编译命令即可。
+当然对于非常简单的.c文件(不涉及android特用的lib库)编译是不需要用到Makefile的，可以export交叉编译工具链到系统环境(export PATH=$PATH:toolchains/arm-linux-androideabi-4.6/prebuilt/linux-x86_64/bin/)，然后直接使用arm-linux-androideabi-gcc交叉编译命令即可。或者不导入编译环境，而是在每次使用命令时 --sysroot 指定编译时使用的头文件和库文件，即“arm-linux-androideabi-gcc --sysroot=$NDK_BASE/platforms/android-19/arch-arm hello.c -o hello”。这两种方法可参考[【ndk】直接使用ndk提供的arm-linux-androideabi-gcc编译android可执行程序](http://blog.csdn.net/smilefyx/article/details/73692126)。
 7. 接下来的工作主要就是本地JNI开发了。
 	1. 提取已安装应用的apk文件，代码如下：  
 	```
