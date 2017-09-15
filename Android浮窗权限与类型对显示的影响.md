@@ -1,5 +1,5 @@
 ### 因为项目App中要使用到浮窗，因此考虑模仿360浮窗的实现方式。当然只是App内部用，并不需要使用service来达到全局浮窗的效果。由于Android本身有对使用系统级Window的权限API，以及国内不同手机厂商对浮窗的权限限制，有必要测试对不同条件下的显示效果，最终测试结果如下：
-![](Android-float-window.png)  
+![](./pic/Android-float-window.png)  
 
 - 小米手机上比较特殊，只要是指定了Type类型，都需要在AndroidManifest.xml中声明“android.permission.SYSTEM_ALERT_WINDOW”权限，且手动启用权限（安全中心-授权管理-应用权限管理-XX应用-显示悬浮窗-允许），才能显示悬浮window；  
 - 不同的手机安全策略不一样。以vivo x6D为例，当指定了Type类型，且类型是TYPE_TOAST以外时，除了需要在AndroidManifest.xml中声明“android.permission.SYSTEM_ALERT_WINDOW”权限，同样也需要手动启用权限（i管家-软件管理-悬浮窗管理-xx应用-开启），否则在应用类悬浮window能够正常显示，然而一旦app切换到后台，悬浮window会隐藏，直到app再次切换回前台，悬浮window才会重新显示；  
