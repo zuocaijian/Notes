@@ -10,4 +10,4 @@
 
 > * 删除关联远程仓库：git remote remove origin
 > * 查看远程仓库地址：git remote -v
-> * 查看当前分支默认关联的远程分支：git remote -vv
+> * 查看当前分支默认关联的远程分支：git branch -vv
