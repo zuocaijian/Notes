@@ -7,5 +7,5 @@
   5. direction为-1； (是指向View.canScrollVertically(int direction) 方法中传递的参数);  
   6. 通过VelocityTracker获得的VelocityY为正值。 但是使用Scroller.fling()方法传递参数时，需要填入VelocityY的相反数。  
 
-## 二、View测绘等回调方法的顺序
+## 二、View测绘等回调方法的顺序  
   **onFinishInflate()** --> **onAttachedToWindow()** --> **onMeasure(int, int)** --> **onSizeChanged(int, int, int, int)** --> **onLayout(boolean, int, int, int, int)** --> **onMeasure(int, int)** --> **onLayout(boolean, int, int, int, int)** --> ... --> **onDetachedFromWindow()**
