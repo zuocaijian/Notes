@@ -67,10 +67,10 @@
 	gitlab_rails['smtp_domain'] = "163.com"
 	gitlab_rails['smtp_authentication'] = :login
 	gitlab_rails['smtp_enable_starttls_auto'] = true
-	```
 	# 修改gitlab配置的发信人
 	gitlab_rails['gitlab_email_from'] = "yourusername@163.com"
 	user["git_user_email"] = "yourusername@163.com"
+	```
 	* 更新配置，重启gitlab
 	```
 	gitlab-ctl reconfigure
