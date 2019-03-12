@@ -5,8 +5,8 @@
 
 # 编译步骤
 
-##1、 生成(安装)交叉编译链工具
-	> 参考：[自定义NDK交叉编译链](https://www.jianshu.com/  p/141b45d972b1)  
+## 1、 生成(安装)交叉编译链工具  
+	> 参考：[自定义NDK交叉编译链](https://www.jianshu.com/p/141b45d972b1)  
 
 *Android平台目前的架构有armeabi、armeabi-v7a、arm64-v8a、x86、x86_64、mips，我们需要指定不同的交叉编译工具链来完成不同平台架构库的编译工作。具体对应的工具链地址在`$(NDK)/toolchains`目录中*  
 
@@ -62,7 +62,7 @@
    		sh $shmake --arch=${archs[i]} --platform=$platform --install-dir=$HOME/Chain/android-toolchain/${archs[i]} --toolchain=${toolchains[i]}
 	done
 	```
-##2、 生成配置文件  
+## 2、 生成配置文件  
 1. 在FFmpeg源码目录中创建`build_android.sh`脚本文件，内容如下：
 ```
 	#!/bin/bash
@@ -113,9 +113,9 @@ SLIB_INSTALL_LINKS='$(SLIBNAME)'
 ```
 2. 修改`build_android.sh`的权限模式为可执行：`chmod +x build_android.sh`
 3. 执行脚本：`.\build_android.sh`
-##3、 编译
+## 3、 编译  
 执行make命令，并指定线程数加快编译速度：`make -j4`
-##4、 安装
+## 4、 安装  
 执行make命令：`make install`，顺利完成后将在`build_android.sh`脚本文件中`--prefix=$PREFIX`指定的目录下找到生成的动态链接库。
 
 # 编译中出现的错误及解决方法
