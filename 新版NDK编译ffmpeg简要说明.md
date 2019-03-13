@@ -19,13 +19,27 @@
 | 基于 x86-64 | x86_64-&lt;gcc-version&gt; |
 | 基于 MIPS64 | mips64el-linux-android-&lt;gcc-version&gt; |
 
+*关于手机CPU和ABI的兼容性关系说明。在应用安装运行时，CPU会选择其支持的ABI架构类型的.so文件，如果CPU支持多个ABI架构，会按照优先级进行选择*  
+
+| CPU类型 | 支持的ABI及优先级（高到低） |
+| :----: | :----: |
+| ARMv5 | armeabi |
+| ARMv7 | armeabi、armeabi-v7a |
+| ARMv8 | armeabi、armeabi-v7a、arm64-v8 |
+| MIPS  | mips |
+| MIPS64| mips、mips64 |
+| x86   | x86、armeabi、armeabi-v7a |
+| x86_64| armeabi、x86、x86_64 |
+
+ 
+
 可以使用NDK提供的`make-standalone-toolchain.sh`脚本来生成安装定制交叉编译工具链。切换到`$(NDK)/build/tools/`目录下，执行如下命令：
 	```./make-standalone-toolchain.sh --arch=arm --platform=android-21 --install-dir=./arm/ --toolchain=arm-linux-androideabi-4.9```  
 - 关于该脚本命令行参数说明：
-	--arch 平台架构名称
-	--platform 目标平台api
-	--install-dir 交叉编译工具链生成安装目录
-	--toolchain 工具链名称
+	--arch 平台架构名称  
+	--platform 目标平台api  
+	--install-dir 交叉编译工具链生成安装目录  
+	--toolchain 工具链名称  
 - 命令执行后，会在`--install-dir`指定的安装目录生成对应的工具链文件夹。我们将使用该目录下工具链来编译ffmpeg源码。  
 - 我们也可以编写shell脚本，一次性生成全部平台架构的交叉编译工具链。
 	```
@@ -96,7 +110,7 @@
 	ADDI_CFLAGS="-I$NDK/sysroot/usr/include/arm-linux-androideabi -isysroot $NDK/sysroot -marm"
 	build_one
 ```
-注意这里的`--target-os=android`这里指定了目标系统为Android，编译后会将动态链接库命名成Android系统能识别的形式。若是将其赋值为`--target-os=linux`则需要修改`configure`文件。因为Android系统加载的动态链接库格式一般为libxx.so，而这与ffmpeg默认生成的动态链接库名称不一致，所以我们需要打开源码中的`configure`文件，找到其中的
+- 注意这里的`--target-os=android`这里指定了目标系统为Android，编译后会将动态链接库命名成Android系统能识别的形式。若是将其赋值为`--target-os=linux`则需要修改`configure`文件。因为Android系统加载的动态链接库格式一般为libxx.so，而这与ffmpeg默认生成的动态链接库名称不一致，所以我们需要打开源码中的`configure`文件，找到其中的
 ```
 SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'
 LIB_INSTALL_EXTRA_CMD='$$(RANLIB) "$(LIBDIR)/$(LIBNAME)"'
@@ -110,7 +124,11 @@ SLIBNAME_WITH_MAJOR='$(SLIBPREF)$(FULLNAME)-$(LIBMAJOR)$(SLIBSUF)'
 LIB_INSTALL_EXTRA_CMD='$$(RANLIB) "$(LIBDIR)/$(LIBNAME)"'
 SLIB_INSTALL_NAME='$(SLIBNAME_WITH_MAJOR)'
 SLIB_INSTALL_LINKS='$(SLIBNAME)'
-```
+```  
+
+- 由于我们已经在第一步中生成了指定平台架构、平台架构和工具链的全部工具副本，所以我们也可以直接将`SYSROOT`的位置指向`$TOOLCHAIN/sysroot`，这样我们就不用再往`--extra-cflags`中增加额外的头文件和库文件路径了，因为第一步中已将交叉编译需要的全部头文件和库文件都拷贝了一份到`$TOOLCHAIN/sysroot`中了。  
+- 从NDK 18 开始，编译器有gnu系列替换为clang，因此编译ffmpeg时会导致部分函数参数类型不匹配而失败，目前还没有找到好的方法可以解决。    
+
 2. 修改`build_android.sh`的权限模式为可执行：`chmod +x build_android.sh`
 3. 执行脚本：`.\build_android.sh`
 ## 3、 编译  
