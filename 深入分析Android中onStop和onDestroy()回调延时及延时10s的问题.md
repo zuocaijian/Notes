@@ -196,7 +196,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 mWindowManager.prepareAppTransition(transit, false);
 
                 // Tell window manager to prepare for this one to be removed.
-                将当前Activity设置为不可见
+                //将当前Activity设置为不可见
                 r.setVisibility(false);
 
                 if (mPausingActivity == null) {//还未暂停当前Activity，因此mPausingActivity为null
